@@ -3,6 +3,42 @@ blueprint:
   name: WUnderground upload
   description: >
     Upload data from Home Assistant to WUnderground.
+
+    Config:
+      The station_id and station_key variable must be fetched from WUnderground.
+      The sensor_* variables are the sensors whos data will be uploaded
+      The trigger_entities variable specifies the entries to trigger state changes on (this could be a list)
+      The curl_command_service variable specifies the CURL-service to execute.
+      The refresh_frequency variable specifies the frequency the sensors update their data
+      The dewpoint temperature can be calculated based on the outdoor temperature and the outdoor humidity.
+        By default, it will be calculated, to disable this set calculate_dewpt to false.
+
+    The CURL-service must exist in Home Assistant.
+    This can be configured with the following YAML
+      shell_command:
+        curl_get: 'curl -X GET {{ url }}'
+
+    Automation config example:
+      automation:
+        - id: wunderground_data_upload
+          alias: WUnderground data upload
+          use_blueprint:
+            path: wunderground_upload.yaml
+            input:
+              station_id: !secret wunderground_station_id
+              station_key: !secret wunderground_station_key
+              sensor_baro: 'sensor.outdoor_pressure'
+              sensor_temp: 'sensor.outdoor_temperature'
+              sensor_humidity: 'sensor.outdoor_humidity'
+              sensor_rain: 'sensor.outdoor_rain'
+              sensor_dailyrain: 'sensor.outdoor_rain_today'
+              refresh_frequency: 300
+              trigger_entities:
+                - sensor.outdoor_temperature
+                - sensor.outdoor_humidity
+                - sensor.outdoor_rain
+                - sensor.outdoor_rain_today
+              curl_command_service: shell_command.curl_get
   domain: automation
   source_url: "https://github.com/dvandonkelaar/home-assistant-blueprints/raw/main/wunderground_upload.yaml"
   input:
@@ -101,12 +137,6 @@ blueprint:
         entity:
           domain: sensor
       default: ''
-    sensor_AqPM25:
-      name: PM 2.5
-      selector:
-        entity:
-          domain: sensor
-      default: ''      
     refresh_frequency:
       name: Refresh frequency (seconds)
       selector:
@@ -159,7 +189,6 @@ variables:
   sensor_solarradiation: !input sensor_solarradiation
   sensor_indoorhumidity: !input sensor_indoorhumidity
   sensor_uvindex: !input sensor_uvindex
-  sensor_AqPM25: !input sensor_AqPM25  
   rtfreq: !input refresh_frequency
   delay: !input delay
   baromin: >
@@ -206,9 +235,6 @@ variables:
   UV: >
     {{ sensor_uvindex if sensor_uvindex == ''
        else (states(sensor_uvindex) | int(default=0)) }}
-  AqPM25: >
-    {{ sensor_AqPM25 if sensor_AqPM25 == ''
-       else (states(sensor_AqPM25) | int(default=0)) }}       
   dewptf_calculated: >
     {% set unit_of_measurement = state_attr(sensor_temp, 'unit_of_measurement') %}
     {% set T = ((states(sensor_temp) | float(default=0)) if unit_of_measurement == '°C'
@@ -229,6 +255,7 @@ variables:
             else ((states(sensor_dewpt) | float(default=0)) * 1.8) + 32) }}
   payload: >
     {% set data = namespace(sensors=[]) %}
+
     {% for i in [['rtfreq', rtfreq]
           ,['baromin', baromin]
           ,['tempf', tempf]
@@ -243,13 +270,13 @@ variables:
           ,['indoorhumidity', indoorhumidity]
           ,['solarradiation', solarradiation]
           ,['UV', UV]
-          ,['AqPM25', AqPM25]          
           ]%}
       {% if i[1] != '' %}
         {% set data.sensors= data.sensors + ['{}={}'.format(i[0], (i[1] if i[0] == 'rtfreq'
                                               else (i[1] | round(3, default="notavailable")) | string))] %}
       {% endif %}
     {% endfor %}
+
     {% set _payload = 'ID=' + station_id %}
     {% set _payload = _payload + '&PASSWORD=' + station_key %}
     {% set _payload = _payload + '&action=updateraww' %}
@@ -258,6 +285,7 @@ variables:
     {% set _payload = _payload + '&' if data.sensors | length > 0 else '' %}
     {% set _payload = _payload + data.sensors | join('&') %}
     {{ _payload }}
+
 action:
   - alias: "Check if station_id and station_key exist"  
     condition: and
