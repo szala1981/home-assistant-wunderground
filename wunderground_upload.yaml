@@ -90,8 +90,8 @@ blueprint:
           domain: sensor
           device_class: humidity
       default: ''
-    sensor_AqPM2.5:
-      name: AqPM2.5
+    sensor_AqPM25:
+      name: Czasteczki PM2.5
       selector:
         entity:
           domain: sensor
@@ -146,7 +146,7 @@ variables:
   sensor_dailyrain: !input sensor_dailyrain
   sensor_indoortemp: !input sensor_indoortemp
   sensor_indoorhumidity: !input sensor_indoorhumidity
-  sensor_AqPM2.5: !input sensor_AqPM2.5
+  sensor_AqPM25: !input sensor_AqPM25
   rtfreq: !input refresh_frequency
   delay: !input delay
   baromin: >
@@ -188,8 +188,8 @@ variables:
     {{ sensor_indoorhumidity if sensor_indoorhumidity == ''
         else (states(sensor_indoorhumidity) | float(default=0)) }}
   AqPM2.5: >
-    {{ sensor_AqPM2.5 if sensor_AqPM2.5 == ''
-        else (states(sensor_AqPM2.5) | float(default=0)) }}        
+    {{ sensor_AqPM25 if sensor_AqPM25 == ''
+        else (states(sensor_AqPM25) | float(default=0)) }}        
   dewptf_calculated: >
     {% set unit_of_measurement = state_attr(sensor_temp, 'unit_of_measurement') %}
     {% set T = ((states(sensor_temp) | float(default=0)) if unit_of_measurement == '°C'
