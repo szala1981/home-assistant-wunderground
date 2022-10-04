@@ -90,6 +90,12 @@ blueprint:
           domain: sensor
           device_class: humidity
       default: ''
+    sensor_AqPM2.5:
+      name: AqPM2.5
+      selector:
+        entity:
+          domain: sensor
+      default: ''      
     refresh_frequency:
       name: Refresh frequency (seconds)
       selector:
@@ -140,6 +146,7 @@ variables:
   sensor_dailyrain: !input sensor_dailyrain
   sensor_indoortemp: !input sensor_indoortemp
   sensor_indoorhumidity: !input sensor_indoorhumidity
+  sensor_AqPM2.5: !input sensor_AqPM2.5
   rtfreq: !input refresh_frequency
   delay: !input delay
   baromin: >
@@ -180,6 +187,9 @@ variables:
   indoorhumidity: >
     {{ sensor_indoorhumidity if sensor_indoorhumidity == ''
         else (states(sensor_indoorhumidity) | float(default=0)) }}
+  AqPM2.5: >
+    {{ sensor_AqPM2.5 if sensor_AqPM2.5 == ''
+        else (states(sensor_AqPM2.5) | float(default=0)) }}        
   dewptf_calculated: >
     {% set unit_of_measurement = state_attr(sensor_temp, 'unit_of_measurement') %}
     {% set T = ((states(sensor_temp) | float(default=0)) if unit_of_measurement == '°C'
@@ -213,6 +223,7 @@ variables:
           ,['dailyrainin', dailyrainin]
           ,['indoortempf', indoortempf]
           ,['indoorhumidity', indoorhumidity]
+          ,['AqPM2.5', AqPM2.5]
           ]%}
       {% if i[1] != '' %}
         {% set data.sensors= data.sensors + ['{}={}'.format(i[0], (i[1] if i[0] == 'rtfreq'
