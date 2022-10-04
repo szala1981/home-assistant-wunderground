@@ -1,6 +1,6 @@
 
 blueprint:
-  name: WUnderground upload
+  name: WUnderground upload PM2.5
   description: >
     Upload data from Home Assistant to WUnderground.
 
