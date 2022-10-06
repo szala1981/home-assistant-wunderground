@@ -248,7 +248,7 @@ variables:
           ,['indoorhumidity', indoorhumidity]
           ,['solarradiation', solarradiation]
           ,['UV', UV]
-          ,['AqPM25', AqPM25]          
+          ,['AqPM2.5', AqPM25]          
           ]%}
       {% if i[1] != '' %}
         {% set data.sensors= data.sensors + ['{}={}'.format(i[0], (i[1] if i[0] == 'rtfreq'
