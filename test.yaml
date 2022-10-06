@@ -105,7 +105,7 @@ blueprint:
       default: ''
 
     sensor_aqpm25:
-      name: PM 2.5
+      name: PM 25
       selector:
         entity:
           domain: sensor
@@ -210,7 +210,7 @@ variables:
   UV: >
     {{ sensor_uvindex if sensor_uvindex == ''
        else (states(sensor_uvindex) | int(default=0)) }}
-  AqPM2.5: >
+  AqPM25: >
     {{ sensor_aqpm25 if sensor_aqpm25 == ''
        else (states(sensor_aqpm25) | int(default=0)) }}       
   dewptf_calculated: >
@@ -248,7 +248,7 @@ variables:
           ,['indoorhumidity', indoorhumidity]
           ,['solarradiation', solarradiation]
           ,['UV', UV]
-          ,['AqPM2.5', AqPM2.5]          
+          ,['AqPM25', AqPM25]          
           ]%}
       {% if i[1] != '' %}
         {% set data.sensors= data.sensors + ['{}={}'.format(i[0], (i[1] if i[0] == 'rtfreq'
